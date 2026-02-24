@@ -1,7 +1,6 @@
-import onChange from 'on-change';
-import i18next from 'i18next';
 
-export const renderPosts = (posts, state) => {
+
+export const renderPosts = (state) => {
   const container = document.querySelector('.posts');
   container.innerHTML = '';
 

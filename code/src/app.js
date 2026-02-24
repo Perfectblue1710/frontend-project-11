@@ -1,4 +1,5 @@
 import { renderFeeds, renderPosts, renderModal } from './view.js';
+import onChange from 'on-change';
 
 export default function initApp() {
  const watchedState = onChange(state, (path) => {
