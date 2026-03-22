@@ -1,10 +1,10 @@
 import './style.css';
-import i18n from './i18n.js';
+import i18n from './i18n.js'
 import setYupLocale from './yupLocale.js';
 import validator from './validator.js';
 import initView from './view.js';
 import state from './state.js';
-import i18next from 'i18next';
+
 setYupLocale();
 
 const elements = {
@@ -35,7 +35,7 @@ elements.form.addEventListener('submit', (e) => {
       watchedState.form.error = err.message; // ← КЛЮЧ
     });
 }); 
-const i18n = i18next.createInstance();
+
 
 i18n.init({
   lng: 'ru',
