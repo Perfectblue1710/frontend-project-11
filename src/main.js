@@ -1,6 +1,6 @@
 import './style.css';
 import i18n from './i18n.js'
-import setYupLocale from './yupLocale.js';
+import setYupLocale from './yupLocal.js';
 import validator from './validator.js';
 import initView from './view.js';
 import state from './state.js';
