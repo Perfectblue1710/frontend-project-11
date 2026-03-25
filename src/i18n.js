@@ -8,3 +8,4 @@ await i18next.init({
     ru,
   },
 });
+ export default i18next;

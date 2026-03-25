@@ -41,3 +41,4 @@ export const renderPosts = (state) => {
   document.querySelector('.modal-body').textContent = post.description;
   document.querySelector('.full-article').href = post.link;
 };
+export default renderPosts;
