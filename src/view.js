@@ -4,7 +4,7 @@ export const renderPosts = (state) => {
   const container = document.querySelector('.posts');
   container.innerHTML = '';
 
-  posts.forEach((post) => {
+  state.posts.forEach((post) => {
     const li = document.createElement('li');
     li.classList.add('d-flex', 'justify-content-between');
 

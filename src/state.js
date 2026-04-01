@@ -1,15 +1,14 @@
 const state = {
   feeds: [],
   posts: [],
+  form: {
+    status: null,
+    error: null,
+  },
   ui: {
     viewedPosts: new Set(),
     modalPostId: null,
-  },
-  form: {
-    status: 'idle',
-    error: null,
-  },
-  
+  }
 };
 
 export default state;

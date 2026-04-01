@@ -10,7 +10,7 @@ setYupLocale();
 const elements = {
   form: document.querySelector('form'),
   input: document.querySelector('input[name="url"]'),
-  feedback: document.querySelector('.invalid-feedback'),
+  feedback: document.querySelector('.feedback'),
 };
 
 const watchedState = initView(state, elements);
@@ -32,7 +32,7 @@ elements.form.addEventListener('submit', (e) => {
     })
     .catch((err) => {
       watchedState.form.status = 'failed';
-      watchedState.form.error = err.message; // ← КЛЮЧ
+      watchedState.form.error = err.message;
     });
 }); 
 
@@ -42,7 +42,7 @@ i18n.init({
   resources: {
     ru: {
       translation: {
-        // ...
+
       },
     },
   },

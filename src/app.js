@@ -101,7 +101,7 @@ export default () => {
           watchedState.posts.unshift(...newPosts);
         })
         .catch(() => {
-          // ошибки игнорируем
+
         })
     );
 
