@@ -7,25 +7,32 @@ export const fetchRSS = (url) => {
   return axios.get(fullUrl)
     .then((response) => response.data.contents);
 };
+
 export const parseRSS = (xmlString) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlString, 'application/xml');
 
   const errorNode = doc.querySelector('parsererror');
   if (errorNode) {
-    throw new Error('invalidRSS');
+    throw new Error('Invalid RSS');
   }
 
   const channel = doc.querySelector('channel');
 
+  if (!channel) {
+    throw new Error('Invalid RSS');
+  }
+
   const feed = {
-    title: channel.querySelector('title').textContent,
-    description: channel.querySelector('description').textContent,
+    title: channel.querySelector('title')?.textContent,
+    description: channel.querySelector('description')?.textContent,
   };
 
-const posts = Array.from(doc.querySelectorAll('item')).map((item) => ({
-  title: item.querySelector('title').textContent,
-  link: item.querySelector('link').textContent,
-  description: item.querySelector('description')?.textContent ?? '',
-}));
+  const posts = Array.from(doc.querySelectorAll('item')).map((item) => ({
+    title: item.querySelector('title')?.textContent,
+    link: item.querySelector('link')?.textContent,
+    description: item.querySelector('description')?.textContent ?? '',
+  }));
+
+  return { feed, posts };
 };

@@ -1,6 +1,11 @@
 import onChange from 'on-change';
 import { fetchRSS, parseRSS } from './rss.js';
-import { renderFeeds, renderPosts, renderModal } from './view.js';
+import {
+  renderFeeds,
+  renderPosts,
+  renderModal,
+  renderForm,
+} from './view.js';
 
 export default () => {
   const state = {
@@ -18,11 +23,15 @@ export default () => {
 
   const watchedState = onChange(state, (path) => {
     if (path.startsWith('feeds')) {
-      renderFeeds(state.feeds);
+      renderFeeds(state);
     }
 
     if (path.startsWith('posts')) {
-      renderPosts(state.posts, state);
+      renderPosts(state);
+    }
+
+    if (path.startsWith('form')) {
+      renderForm(state.form);
     }
 
     if (path === 'ui.modalPostId') {
@@ -30,7 +39,7 @@ export default () => {
     }
 
     if (path === 'ui.viewedPosts') {
-      renderPosts(state.posts, state);
+      renderPosts(state);
     }
   });
 
@@ -43,10 +52,18 @@ export default () => {
     const url = new FormData(form).get('url');
 
     watchedState.form.status = 'sending';
+    watchedState.form.error = null;
 
     fetchRSS(url)
       .then(parseRSS)
       .then(({ feed, posts }) => {
+        const exists = watchedState.feeds.some((f) => f.url === url);
+        if (exists) {
+          watchedState.form.status = 'error';
+          watchedState.form.error = 'exists';
+          return;
+        }
+
         const feedId = crypto.randomUUID();
 
         watchedState.feeds.push({
@@ -65,50 +82,26 @@ export default () => {
 
         watchedState.form.status = 'success';
       })
-      .catch(() => {
+      .catch((e) => {
         watchedState.form.status = 'error';
+
+        if (e.message === 'Network Error') {
+          watchedState.form.error = 'network';
+        } else if (e.message === 'Invalid RSS') {
+          watchedState.form.error = 'noRss';
+        } else {
+          watchedState.form.error = 'unknown';
+        }
       });
   });
 
   postsContainer.addEventListener('click', (e) => {
     const { id } = e.target.dataset;
 
-    if (!id) {
-      return;
-    }
+    if (!id) return;
 
     watchedState.ui.viewedPosts.add(id);
     watchedState.ui.modalPostId = id;
   });
-
-  const checkUpdates = () => {
-    const { feeds } = watchedState;
-
-    const promises = feeds.map((feed) =>
-      fetchRSS(feed.url)
-        .then(parseRSS)
-        .then(({ posts }) => {
-          const existingLinks = watchedState.posts.map((post) => post.link);
-
-          const newPosts = posts
-            .filter((post) => !existingLinks.includes(post.link))
-            .map((post) => ({
-              id: crypto.randomUUID(),
-              feedId: feed.id,
-              ...post,
-            }));
-
-          watchedState.posts.unshift(...newPosts);
-        })
-        .catch(() => {
-
-        })
-    );
-
-    Promise.all(promises).finally(() => {
-      setTimeout(checkUpdates, 5000);
-    });
-  };
-
-  checkUpdates();
+  
 };
