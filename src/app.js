@@ -1,11 +1,6 @@
 import onChange from 'on-change';
 import { fetchRSS, parseRSS } from './rss.js';
-import {
-  renderFeeds,
-  renderPosts,
-  renderModal,
-  renderForm,
-} from './view.js';
+import { renderFeeds, renderPosts, renderModal, renderForm } from './view.js';
 
 export default () => {
   const state = {
@@ -82,9 +77,10 @@ export default () => {
 
         watchedState.form.status = 'success';
       })
-.catch((err) => {
+.catch(() => {
+  watchedState.form.error = 'network';
   watchedState.form.status = 'error';
-  watchedState.form.error = err.message;
+  
 
         if (e.message === 'Network Error') {
           watchedState.form.error = 'network';
