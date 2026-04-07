@@ -82,8 +82,9 @@ export default () => {
 
         watchedState.form.status = 'success';
       })
-      .catch((e) => {
-        watchedState.form.status = 'error';
+.catch((err) => {
+  watchedState.form.status = 'error';
+  watchedState.form.error = err.message;
 
         if (e.message === 'Network Error') {
           watchedState.form.error = 'network';

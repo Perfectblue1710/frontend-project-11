@@ -1,8 +1,8 @@
-export const renderFeeds = (state) => {
+export const renderFeeds = (feeds) => {
   const container = document.querySelector('.feeds');
   container.innerHTML = '';
 
-  state.feeds.forEach((feed) => {
+  feeds.forEach((feed) => {
     const div = document.createElement('div');
 
     const title = document.createElement('h3');
@@ -17,11 +17,11 @@ export const renderFeeds = (state) => {
   });
 };
 
-export const renderPosts = (state) => {
+export const renderPosts = (posts, state) => {
   const container = document.querySelector('.posts');
   container.innerHTML = '';
 
-  state.posts.forEach((post) => {
+  posts.forEach((post) => {
     const li = document.createElement('li');
     li.classList.add('d-flex', 'justify-content-between');
 
@@ -73,6 +73,7 @@ export const renderForm = (form) => {
       noRss: 'Ресурс не содержит валидный RSS',
       exists: 'RSS уже существует',
       unknown: 'Ошибка',
+      invalidUrl: 'Ссылка должна быть валидным URL',
     };
 
     feedback.textContent = messages[form.error] || 'Ошибка';
