@@ -16,27 +16,23 @@ export default () => {
     },
   };
 
-  const watchedState = onChange(state, (path) => {
-    if (path.startsWith('feeds')) {
-      renderFeeds(state);
-    }
+const watchedState = onChange(state, (path) => {
+  if (path.startsWith('feeds')) {
+    renderFeeds(watchedState);
+  }
 
-    if (path.startsWith('posts')) {
-      renderPosts(state);
-    }
+  if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
+    renderPosts(watchedState);
+  }
 
-    if (path.startsWith('form')) {
-      renderForm(state.form);
-    }
+  if (path === 'ui.modalPostId') {
+    renderModal(watchedState);
+  }
 
-    if (path === 'ui.modalPostId') {
-      renderModal(state);
-    }
-
-    if (path === 'ui.viewedPosts') {
-      renderPosts(state);
-    }
-  });
+  if (path.startsWith('form')) {
+    renderForm(watchedState.form);
+  }
+});
 
   const form = document.querySelector('form');
   const postsContainer = document.querySelector('.posts');
@@ -50,15 +46,13 @@ export default () => {
     watchedState.form.error = null;
 
     fetchRSS(url)
-      .then(parseRSS)
-      .then(({ feed, posts }) => {
-        const exists = watchedState.feeds.some((f) => f.url === url);
-        if (exists) {
-          watchedState.form.status = 'error';
-          watchedState.form.error = 'exists';
-          return;
-        }
-
+try {
+  new URL(url);
+} catch {
+  watchedState.form.status = 'error';
+  watchedState.form.error = 'invalidUrl';
+  return;
+}
         const feedId = crypto.randomUUID();
 
         watchedState.feeds.push({
@@ -77,10 +71,17 @@ export default () => {
 
         watchedState.form.status = 'success';
       })
-.catch(() => {
-  watchedState.form.error = 'network';
+.catch((e) => {
   watchedState.form.status = 'error';
-  
+
+  if (e.message === 'Network Error') {
+    watchedState.form.error = 'network';
+  } else if (e.message === 'Invalid RSS') {
+    watchedState.form.error = 'noRss';
+  } else {
+    watchedState.form.error = 'unknown';
+  }
+});
 
         if (e.message === 'Network Error') {
           watchedState.form.error = 'network';
@@ -89,8 +90,7 @@ export default () => {
         } else {
           watchedState.form.error = 'unknown';
         }
-      });
-  });
+      };
 
   postsContainer.addEventListener('click', (e) => {
     const { id } = e.target.dataset;
@@ -100,5 +100,3 @@ export default () => {
     watchedState.ui.viewedPosts.add(id);
     watchedState.ui.modalPostId = id;
   });
-  
-};
