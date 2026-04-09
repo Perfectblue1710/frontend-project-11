@@ -3,17 +3,23 @@ export const renderFeeds = (feeds) => {
   container.innerHTML = '';
 
   feeds.forEach((feed) => {
-    const div = document.createElement('div');
+    const item = document.createElement('div');
+    item.classList.add('card', 'mb-3');
+
+    const body = document.createElement('div');
+    body.classList.add('card-body');
 
     const title = document.createElement('h3');
+    title.classList.add('card-title', 'h6');
     title.textContent = feed.title;
 
     const desc = document.createElement('p');
+    desc.classList.add('card-text', 'small', 'text-muted');
     desc.textContent = feed.description;
 
-    div.append(title);
-    div.append(desc);
-    container.append(div);
+    body.append(title, desc);
+    item.append(body);
+    container.append(item);
   });
 };
 
@@ -23,14 +29,18 @@ export const renderPosts = (posts, state) => {
 
   posts.forEach((post) => {
     const li = document.createElement('li');
-    li.classList.add('d-flex', 'justify-content-between');
+    li.classList.add(
+      'list-group-item',
+      'd-flex',
+      'justify-content-between',
+      'align-items-start'
+    );
 
     const link = document.createElement('a');
     link.href = post.link;
     link.textContent = post.title;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.dataset.id = post.id;
 
     if (state.ui.viewedPosts.has(post.id)) {
       link.classList.add('fw-normal');
@@ -39,12 +49,12 @@ export const renderPosts = (posts, state) => {
     }
 
     const button = document.createElement('button');
+    button.type = 'button';
     button.textContent = 'Просмотр';
-    button.classList.add('btn', 'btn-sm', 'btn-outline-primary');
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.dataset.id = post.id;
 
-    li.append(link);
-    li.append(button);
+    li.append(link, button);
     container.append(li);
   });
 };
@@ -61,23 +71,28 @@ export const renderModal = (state) => {
 export const renderForm = (form) => {
   const feedback = document.querySelector('.feedback');
 
+  const messages = {
+    success: 'RSS успешно загружен',
+    exists: 'RSS уже существует',
+    invalidUrl: 'Ссылка должна быть валидным URL',
+    noRss: 'Ресурс не содержит валидный RSS',
+    network: 'Ошибка сети',
+    unknown: 'Ошибка',
+  };
+
+  feedback.classList.remove('text-success', 'text-danger');
+
   if (form.status === 'success') {
-    feedback.textContent = 'RSS успешно загружен';
-    feedback.classList.remove('text-danger');
+    feedback.textContent = messages.success;
     feedback.classList.add('text-success');
+    return;
   }
 
   if (form.status === 'error') {
-    const messages = {
-      network: 'Ошибка сети',
-      noRss: 'Ресурс не содержит валидный RSS',
-      exists: 'RSS уже существует',
-      unknown: 'Ошибка',
-      invalidUrl: 'Ссылка должна быть валидным URL',
-    };
-
-    feedback.textContent = messages[form.error] || 'Ошибка';
-    feedback.classList.remove('text-success');
+    feedback.textContent = messages[form.error] ?? messages.unknown;
     feedback.classList.add('text-danger');
+    return;
   }
+
+  feedback.textContent = '';
 };
