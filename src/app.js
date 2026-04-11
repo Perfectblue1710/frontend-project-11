@@ -22,27 +22,27 @@ export default () => {
     },
   };
 
-  const watchedState = onChange(state, (path) => {
-    if (path.startsWith('feeds')) {
-      renderFeeds(watchedState.feeds);
-    }
+const watchedState = onChange(state, (path) => {
+  if (path.includes('form')) {
+  renderForm(watchedState.form);
+}
 
-    if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
-      renderPosts(watchedState.posts, watchedState);
-    }
+  if (path.startsWith('feeds')) {
+    renderFeeds(watchedState.feeds);
+  }
 
-    if (path === 'ui.modalPostId') {
-      renderModal(watchedState);
-      const modalElement = document.querySelector('#modal') || document.querySelector('.modal');
-      if (modalElement) {
-        Modal.getOrCreateInstance(modalElement).show();
-      }
-    }
+  if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
+    renderPosts(watchedState.posts, watchedState);
+  }
 
-    if (path.startsWith('form')) {
-      renderForm(watchedState.form);
+  if (path === 'ui.modalPostId') {
+    renderModal(watchedState);
+    const modalElement = document.querySelector('#modal') || document.querySelector('.modal');
+    if (modalElement) {
+      Modal.getOrCreateInstance(modalElement).show();
     }
-  });
+  }
+});
 
   const form = document.querySelector('form');
   const postsContainer = document.querySelector('.posts');

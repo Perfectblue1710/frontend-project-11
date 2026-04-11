@@ -69,6 +69,7 @@ export const renderModal = (state) => {
 };
 
 export const renderForm = (form) => {
+   console.log('renderForm called with:', form);
   const feedback = document.querySelector('.feedback');
 
   const messages = {
