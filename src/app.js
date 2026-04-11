@@ -23,10 +23,9 @@ export default () => {
   };
 
 const watchedState = onChange(state, (path) => {
-  if (path.includes('form')) {
+  
   renderForm(watchedState.form);
-}
-
+  
   if (path.startsWith('feeds')) {
     renderFeeds(watchedState.feeds);
   }
