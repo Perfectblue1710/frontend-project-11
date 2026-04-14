@@ -1,5 +1,4 @@
 import onChange from 'on-change';
-import Modal from 'bootstrap/js/dist/modal';
 import { fetchRSS, parseRSS } from './rss.js';
 import {
   renderFeeds,
@@ -22,26 +21,26 @@ export default () => {
     },
   };
 
-const watchedState = onChange(state, (path) => {
-  
-  renderForm(watchedState.form);
-  
-  if (path.startsWith('feeds')) {
-    renderFeeds(watchedState.feeds);
-  }
-
-  if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
-    renderPosts(watchedState.posts, watchedState);
-  }
-
-  if (path === 'ui.modalPostId') {
-    renderModal(watchedState);
-    const modalElement = document.querySelector('#modal') || document.querySelector('.modal');
-    if (modalElement) {
-      Modal.getOrCreateInstance(modalElement).show();
+  const watchedState = onChange(state, (path) => {
+    if (path.startsWith('feeds')) {
+      renderFeeds(watchedState.feeds);
     }
-  }
-});
+
+    if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
+      renderPosts(watchedState.posts, watchedState);
+    }
+
+    if (path === 'ui.modalPostId') {
+      renderModal(watchedState);
+    }
+
+    if (path.startsWith('form')) {
+      renderForm(watchedState.form);
+    }
+  });
+
+  // 🔥 КРИТИЧНО — начальный рендер
+  renderForm(watchedState.form);
 
   const form = document.querySelector('form');
   const postsContainer = document.querySelector('.posts');
@@ -95,7 +94,7 @@ const watchedState = onChange(state, (path) => {
 
         if (error.message === 'Network Error') {
           watchedState.form.error = 'network';
-        } else if (error.message === 'Invalid RSS' || error.message === 'noRss') {
+        } else if (error.message === 'Invalid RSS') {
           watchedState.form.error = 'noRss';
         } else {
           watchedState.form.error = 'unknown';
@@ -104,10 +103,11 @@ const watchedState = onChange(state, (path) => {
   });
 
   postsContainer.addEventListener('click', (e) => {
-    const button = e.target.closest('button[data-id]');
-    if (!button) return;
+    const element = e.target.closest('[data-id]');
+    if (!element) return;
 
-    const { id } = button.dataset;
+    const { id } = element.dataset;
+
     watchedState.ui.viewedPosts.add(id);
     watchedState.ui.modalPostId = id;
   });

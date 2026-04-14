@@ -41,6 +41,7 @@ export const renderPosts = (posts, state) => {
     link.textContent = post.title;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
+    link.dataset.id = post.id; // 🔥 ВАЖНО
 
     if (state.ui.viewedPosts.has(post.id)) {
       link.classList.add('fw-normal');
