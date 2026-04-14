@@ -97,19 +97,7 @@ watchedState.form = {
         form.reset();
       })
 .catch((error) => {
-  let errorType = 'unknown';
-
-  if (error.message === 'Network Error') {
-    errorType = 'network';
-  } else if (error.message === 'Invalid RSS' || error.message === 'noRss') {
-    errorType = 'noRss';
-  }
-
-  watchedState.form = {
-    status: 'error',
-    error: errorType,
-  };
-}).catch((error) => {
+  
   let errorType = 'unknown';
 
   if (error.message === 'Network Error') {
