@@ -39,7 +39,7 @@ export default () => {
     }
   });
 
-  // 🔥 КРИТИЧНО — начальный рендер
+  
   renderForm(watchedState.form);
 
   const form = document.querySelector('form');

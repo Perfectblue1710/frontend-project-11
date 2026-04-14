@@ -1,38 +1,46 @@
 import axios from 'axios';
 
+const proxy = 'https://allorigins.hexlet.app/get';
+
 export const fetchRSS = (url) => {
-  const proxy = 'https://allorigins.hexlet.app/get';
-  const fullUrl = `${proxy}?disableCache=true&url=${encodeURIComponent(url)}`;
+  const fullUrl = new URL(proxy);
+  fullUrl.searchParams.set('disableCache', 'true');
+  fullUrl.searchParams.set('url', url);
 
-  return axios.get(fullUrl)
-    .then((response) => response.data.contents);
-};
-
-export const parseRSS = (xmlString) => {
+  return axios
+    .get(fullUrl.toString())
+    .then((response) => response.data.contents)
+    .catch(() => {
+      throw new Error('Network Error');
+    });
+}; 
+export const parseRSS = (data) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlString, 'application/xml');
+  const doc = parser.parseFromString(data, 'application/xml');
 
-  const errorNode = doc.querySelector('parsererror');
-  if (errorNode) {
+  const parseError = doc.querySelector('parsererror');
+  if (parseError) {
     throw new Error('Invalid RSS');
   }
 
-  const channel = doc.querySelector('channel');
+  const title = doc.querySelector('channel > title')?.textContent;
+  const description = doc.querySelector('channel > description')?.textContent;
 
-  if (!channel) {
+  if (!title || !description) {
     throw new Error('Invalid RSS');
   }
 
-  const feed = {
-    title: channel.querySelector('title')?.textContent,
-    description: channel.querySelector('description')?.textContent,
-  };
+  const items = doc.querySelectorAll('item');
 
-  const posts = Array.from(doc.querySelectorAll('item')).map((item) => ({
+  const posts = Array.from(items).map((item) => ({
     title: item.querySelector('title')?.textContent,
+    description: item.querySelector('description')?.textContent,
     link: item.querySelector('link')?.textContent,
-    description: item.querySelector('description')?.textContent ?? '',
+
   }));
 
-  return { feed, posts };
+  return {
+    feed: { title, description },
+    posts,
+  };
 };
