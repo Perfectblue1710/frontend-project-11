@@ -10,7 +10,7 @@ export const renderFeeds = (feeds) => {
     body.classList.add('card-body');
 
     const title = document.createElement('h3');
-    title.classList.add('card-title', 'h6');
+    title.classList.add('card-title');
     title.textContent = feed.title;
 
     const desc = document.createElement('p');
@@ -70,7 +70,7 @@ export const renderModal = (state) => {
 };
 
 export const renderForm = (form) => {
-  
+
   const feedback = document.querySelector('.feedback');
 
   const messages = {

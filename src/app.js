@@ -53,19 +53,24 @@ export default () => {
     try {
       new URL(url);
     } catch {
-      watchedState.form.status = 'error';
-      watchedState.form.error = 'invalidUrl';
+watchedState.form = {
+  status: 'error',
+  error: 'invalidUrl',
+};
       return;
     }
 
     if (watchedState.feeds.some((feed) => feed.url === url)) {
-      watchedState.form.status = 'error';
-      watchedState.form.error = 'exists';
+watchedState.form = {
+  status: 'error',
+  error: 'exists',
+};
       return;
     }
-
-    watchedState.form.status = 'sending';
-    watchedState.form.error = null;
+watchedState.form = {
+  status: 'sending',
+  error: null,
+};
 
     fetchRSS(url)
       .then(parseRSS)
@@ -85,21 +90,39 @@ export default () => {
         }));
 
         watchedState.posts.push(...normalizedPosts);
-
-        watchedState.form.status = 'success';
+watchedState.form = {
+  status: 'success',
+  error: null,
+};
         form.reset();
       })
-      .catch((error) => {
-        watchedState.form.status = 'error';
+.catch((error) => {
+  let errorType = 'unknown';
 
-        if (error.message === 'Network Error') {
-          watchedState.form.error = 'network';
-        } else if (error.message === 'Invalid RSS') {
-          watchedState.form.error = 'noRss';
-        } else {
-          watchedState.form.error = 'unknown';
-        }
-      });
+  if (error.message === 'Network Error') {
+    errorType = 'network';
+  } else if (error.message === 'Invalid RSS' || error.message === 'noRss') {
+    errorType = 'noRss';
+  }
+
+  watchedState.form = {
+    status: 'error',
+    error: errorType,
+  };
+}).catch((error) => {
+  let errorType = 'unknown';
+
+  if (error.message === 'Network Error') {
+    errorType = 'network';
+  } else if (error.message === 'Invalid RSS' || error.message === 'noRss') {
+    errorType = 'noRss';
+  }
+
+  watchedState.form = {
+    status: 'error',
+    error: errorType,
+  };
+})
   });
 
   postsContainer.addEventListener('click', (e) => {
