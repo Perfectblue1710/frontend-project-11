@@ -4,4 +4,8 @@ import app from './index.js';
 
 console.log('App starting...');
 
-app().catch(console.error);
+app().then(() => {
+  console.log('✅ App initialized successfully');
+}).catch((error) => {
+  console.error('❌ App initialization failed:', error);
+});

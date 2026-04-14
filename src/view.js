@@ -114,10 +114,10 @@ export const renderModal = (state, i18n) => {
 export const renderForm = (form, i18n) => {
    console.log('renderForm called with status:', form.status, 'error:', form.error);
   const feedback = document.querySelector('.feedback');
+    console.log('📝 feedback element:', feedback);
   const submitButton = document.querySelector('button[type="submit"]');
   const input = document.querySelector('input[name="url"]');
-  
-  // Блокировка/разблокировка контролов
+
   if (form.status === 'sending') {
     submitButton.disabled = true;
     input.readOnly = true;
@@ -129,6 +129,8 @@ export const renderForm = (form, i18n) => {
   feedback.classList.remove('text-success', 'text-danger');
   
   if (form.status === 'success') {
+    const message = i18n.t('messages.success');
+    console.log('✅ Success message:', message);
     feedback.textContent = i18n.t('messages.success');
     feedback.classList.add('text-success');
     return;
@@ -136,10 +138,13 @@ export const renderForm = (form, i18n) => {
   
   if (form.status === 'error' && form.error) {
     const errorKey = `messages.${form.error}`;
+    const message = i18n.t('messages.success');
+    console.log('✅ Success message:', message);
     feedback.textContent = i18n.t(errorKey);
     feedback.classList.add('text-danger');
     return;
   }
   
+   console.log('⚪ No message to show');
   feedback.textContent = '';
 };
