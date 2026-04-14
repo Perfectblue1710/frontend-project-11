@@ -6,8 +6,13 @@ import {
   renderModal,
   renderForm,
 } from './view.js';
+import initI18n from './i18n.js';
 
-export default () => {
+const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+export default async () => {
+  const i18n = await initI18n();
+  
   const state = {
     feeds: [],
     posts: [],
@@ -23,102 +28,124 @@ export default () => {
 
   const watchedState = onChange(state, (path) => {
     if (path.startsWith('feeds')) {
-      renderFeeds(watchedState.feeds);
+      renderFeeds(watchedState.feeds, i18n);
     }
 
     if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
-      renderPosts(watchedState.posts, watchedState);
+      renderPosts(watchedState.posts, watchedState, i18n);
     }
 
     if (path === 'ui.modalPostId') {
-      renderModal(watchedState);
+      renderModal(watchedState, i18n);
     }
 
     if (path.startsWith('form')) {
-      renderForm(watchedState.form);
+      renderForm(watchedState.form, i18n);
     }
   });
 
-  
-  renderForm(watchedState.form);
-
   const form = document.querySelector('form');
   const postsContainer = document.querySelector('.posts');
+  
+  // Начальный рендер
+  renderForm(watchedState.form, i18n);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const url = String(new FormData(form).get('url') ?? '').trim();
+    const formData = new FormData(form);
+    const url = String(formData.get('url') ?? '').trim();
 
+    // Валидация на пустоту
+    if (url === '') {
+      watchedState.form = {
+        status: 'error',
+        error: 'empty',
+      };
+      return;
+    }
+
+    // Валидация URL
     try {
       new URL(url);
     } catch {
-watchedState.form = {
-  status: 'error',
-  error: 'invalidUrl',
-};
+      watchedState.form = {
+        status: 'error',
+        error: 'invalidUrl',
+      };
       return;
     }
 
+    // Проверка на дубликат
     if (watchedState.feeds.some((feed) => feed.url === url)) {
-watchedState.form = {
-  status: 'error',
-  error: 'exists',
-};
+      watchedState.form = {
+        status: 'error',
+        error: 'exists',
+      };
       return;
     }
-watchedState.form = {
-  status: 'sending',
-  error: null,
-};
+
+    // Отправка запроса
+    watchedState.form = {
+      status: 'sending',
+      error: null,
+    };
 
     fetchRSS(url)
       .then(parseRSS)
       .then(({ feed, posts }) => {
-        const feedId = crypto.randomUUID();
+        const feedId = generateId();
 
         watchedState.feeds.push({
           id: feedId,
           url,
-          ...feed,
+          title: feed.title,
+          description: feed.description || '',
         });
 
         const normalizedPosts = posts.map((post) => ({
-          id: crypto.randomUUID(),
+          id: generateId(),
           feedId,
-          ...post,
+          title: post.title,
+          description: post.description || '',
+          link: post.link,
         }));
 
-        watchedState.posts.push(...normalizedPosts);
-watchedState.form = {
-  status: 'success',
-  error: null,
-};
+        watchedState.posts.unshift(...normalizedPosts);
+        
+        watchedState.form = {
+          status: 'success',
+          error: null,
+        };
+        
         form.reset();
+        
+        // Возвращаем фокус на поле ввода
+        const input = form.querySelector('input[name="url"]');
+        input.focus();
       })
-.catch((error) => {
-  
-  let errorType = 'unknown';
-
-  if (error.message === 'Network Error') {
-    errorType = 'network';
-  } else if (error.message === 'Invalid RSS' || error.message === 'noRss') {
-    errorType = 'noRss';
-  }
-
-  watchedState.form = {
-    status: 'error',
-    error: errorType,
-  };
-})
+      .catch((error) => {
+        let errorType = 'unknown';
+        
+        if (error.message === 'Network Error') {
+          errorType = 'network';
+        } else if (error.message === 'noRss') {
+          errorType = 'noRss';
+        }
+        
+        watchedState.form = {
+          status: 'error',
+          error: errorType,
+        };
+      });
   });
 
+  // Обработка модального окна через делегирование
   postsContainer.addEventListener('click', (e) => {
-    const element = e.target.closest('[data-id]');
-    if (!element) return;
-
-    const { id } = element.dataset;
-
+    const button = e.target.closest('button[data-id]');
+    if (!button) return;
+    
+    const { id } = button.dataset;
     watchedState.ui.viewedPosts.add(id);
     watchedState.ui.modalPostId = id;
   });

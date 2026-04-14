@@ -1,4 +1,4 @@
 import './style.css';
-import initApp from './app.js';
+import app from './app.js';
 
-initApp();
+app();
