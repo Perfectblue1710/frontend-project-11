@@ -1,7 +1,8 @@
 import axios from 'axios';
-import parseRSS from 'rss-parser';
+import Parser from 'rss-parser';
 
 const proxy = 'https://allorigins.hexlet.app/get';
+const parser = new Parser();
 
 export const fetchRSS = (url) => {
   const fullUrl = new URL(proxy);
@@ -14,19 +15,20 @@ export const fetchRSS = (url) => {
     .catch(() => {
       throw new Error('Network Error');
     });
-}; 
+};
+
 export const parseRSS = async (data) => {
   try {
     const feed = await parser.parseString(data);
-
-  if (!title || !description) {
-    throw new Error('noRss');
-  }
+    
+    if (!feed.title || !feed.items) {
+      throw new Error('Invalid RSS');
+    }
     
     const posts = feed.items.map((item) => ({
-      title: item.title,
+      title: item.title || '',
       description: item.contentSnippet || item.description || '',
-      link: item.link,
+      link: item.link || '',
     }));
     
     return {
