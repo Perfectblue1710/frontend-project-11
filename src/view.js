@@ -112,6 +112,7 @@ export const renderModal = (state, i18n) => {
 };
 
 export const renderForm = (form, i18n) => {
+   console.log('renderForm called with status:', form.status, 'error:', form.error);
   const feedback = document.querySelector('.feedback');
   const submitButton = document.querySelector('button[type="submit"]');
   const input = document.querySelector('input[name="url"]');

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Parser from 'rss-parser';
 
 const proxy = 'https://allorigins.hexlet.app/get';
 const parser = new Parser();
