@@ -11,23 +11,23 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <h1 class="mb-4">RSS Reader</h1>
-
-        <form>
+        
+        <form novalidate>
           <div class="mb-3">
             <label for="url-input" class="form-label">Ссылка RSS</label>
             <input
-              type="url"
+              type="text"
               name="url"
               id="url-input"
               class="form-control"
               aria-label="url"
               autocomplete="off"
-              required
+              novalidate
             />
             <div class="feedback form-text"></div>
           </div>
           <button type="submit" class="btn btn-primary">Добавить</button>
-        </form>
+        </form> 
 
         <div class="feeds mt-4"></div>
 
@@ -35,12 +35,13 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+  
+  <div class="modal fade" id="modal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalLabel"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body"></div>
         <div class="modal-footer">
@@ -51,6 +52,6 @@
     </div>
   </div>
   
-  <script type="module" src="/src/app.js"></script>
+<script type="module" src="./src/app.js"></script>
 </body>
 </html>

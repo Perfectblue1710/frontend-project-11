@@ -52,6 +52,7 @@ export default async () => {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+     e.stopPropagation();
  console.log('📝 Form submitted')
 
     const formData = new FormData(form);
@@ -60,13 +61,12 @@ export default async () => {
 
 
 
-    if (url === '') {
-         console.log('⚠️ Empty URL');
-      watchedState.form = {
-        status: 'error',
-        error: 'empty',
-      };
-      return;
+  if (!url || url.trim() === '') {
+    watchedState.form = {
+      status: 'error',
+      error: 'empty',
+    };
+    return;
     }
 
   try {
