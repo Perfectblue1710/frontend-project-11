@@ -80,7 +80,8 @@ function renderPosts() {
     link.rel = 'noopener noreferrer'
     if (viewedPosts.has(post.id)) {
       link.classList.add('fw-normal', 'link-secondary')
-    } else {
+    }
+    else {
       link.classList.add('fw-bold')
     }
     const button = document.createElement('button')
@@ -132,7 +133,8 @@ async function fetchRSS(url) {
   try {
     const response = await axios.get(fullUrl.toString())
     return response.data.contents
-  } catch {
+  }
+  catch {
     throw new Error('Network Error')
   }
 }
@@ -148,12 +150,13 @@ form.addEventListener('submit', async (e) => {
 
   try {
     new URL(url)
-  } catch {
+  }
+  catch {
     showMessage('Ссылка должна быть валидным URL', true)
     return
   }
 
-  if (feeds.some((feed) => feed.url === url)) {
+  if (feeds.some(feed => feed.url === url)) {
     showMessage('RSS уже существует', true)
     return
   }
@@ -180,15 +183,19 @@ form.addEventListener('submit', async (e) => {
     render()
     showMessage('RSS успешно загружен', false)
     form.reset()
-  } catch (err) {
+  }
+  catch (err) {
     if (err.message === 'noRss') {
       showMessage('Ресурс не содержит валидный RSS', true)
-    } else if (err.message === 'Network Error') {
+    }
+    else if (err.message === 'Network Error') {
       showMessage('Ошибка сети', true)
-    } else {
+    }
+    else {
       showMessage('Ошибка', true)
     }
-  } finally {
+  }
+  finally {
     submitBtn.disabled = false
     input.readOnly = false
     input.focus()
@@ -199,7 +206,7 @@ postsContainer.addEventListener('click', (e) => {
   const button = e.target.closest('.btn-outline-primary')
   if (!button) return
   const postId = button.dataset.id
-  const post = posts.find((p) => p.id === postId)
+  const post = posts.find(p => p.id === postId)
   if (!post) return
 
   if (!viewedPosts.has(post.id)) {

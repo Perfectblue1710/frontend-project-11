@@ -19,7 +19,7 @@ export default [
     rules: {
       'no-unused-vars': 'warn',
       'no-undef': 'error',
-      'preserve-caught-error': 'off', 
+      'preserve-caught-error': 'off',
     },
   },
-];
+]
