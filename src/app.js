@@ -1,41 +1,238 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import axios from 'axios';
 
-// Простой обработчик без i18n и on-change
+const proxy = 'https://allorigins.hexlet.app/get';
+
+// Состояние
+let feeds = [];
+let posts = [];
+let viewedPosts = new Set();
+
+// DOM элементы
 const form = document.querySelector('form');
 const feedback = document.querySelector('.feedback');
 const input = document.querySelector('input[name="url"]');
+const feedsContainer = document.querySelector('.feeds');
+const postsContainer = document.querySelector('.posts');
 
-if (form) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const url = input.value.trim();
-    
-    if (!url) {
-      feedback.textContent = 'Не должно быть пустым';
-      feedback.classList.add('text-danger');
-      return;
-    }
-    
-    try {
-      new URL(url);
-      feedback.textContent = 'RSS успешно загружен';
-      feedback.classList.add('text-success');
-      // Очистка формы (по желанию)
-      input.value = '';
-    } catch {
-      feedback.textContent = 'Ссылка должна быть валидным URL';
-      feedback.classList.add('text-danger');
-    }
-    
-    // Убираем классы через 3 секунды (для чистоты)
-    setTimeout(() => {
-      feedback.classList.remove('text-success', 'text-danger');
-      feedback.textContent = '';
-    }, 3000);
-  });
-} else {
-  console.error('Form not found!');
+// Вспомогательная функция показа сообщения (без автоочистки, чтобы тесты успели прочитать)
+function showMessage(text, isError = false) {
+  feedback.textContent = text;
+  feedback.classList.remove('text-success', 'text-danger');
+  feedback.classList.add(isError ? 'text-danger' : 'text-success');
 }
+
+// Рендер фидов
+function renderFeeds() {
+  feedsContainer.innerHTML = '';
+  if (feeds.length === 0) return;
+
+  const card = document.createElement('div');
+  card.classList.add('card', 'border-0');
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+  const title = document.createElement('h2');
+  title.classList.add('card-title', 'h4');
+  title.textContent = 'Фиды';
+  cardBody.appendChild(title);
+  card.appendChild(cardBody);
+
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'border-0', 'rounded-0');
+  feeds.forEach(feed => {
+    const li = document.createElement('li');
+    li.classList.add('list-group-item', 'border-0', 'p-0', 'mb-3');
+    const feedTitle = document.createElement('h3');
+    feedTitle.classList.add('h6', 'm-0');
+    feedTitle.textContent = feed.title;
+    const feedDesc = document.createElement('p');
+    feedDesc.classList.add('m-0', 'small', 'text-black-50');
+    feedDesc.textContent = feed.description;
+    li.appendChild(feedTitle);
+    li.appendChild(feedDesc);
+    list.appendChild(li);
+  });
+  card.appendChild(list);
+  feedsContainer.appendChild(card);
+}
+
+// Рендер постов
+function renderPosts() {
+  postsContainer.innerHTML = '';
+  if (posts.length === 0) return;
+
+  const card = document.createElement('div');
+  card.classList.add('card', 'border-0');
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+  const title = document.createElement('h2');
+  title.classList.add('card-title', 'h4');
+  title.textContent = 'Посты';
+  cardBody.appendChild(title);
+  card.appendChild(cardBody);
+
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'border-0', 'rounded-0');
+  posts.forEach(post => {
+    const li = document.createElement('li');
+    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'p-0', 'mb-3');
+    const link = document.createElement('a');
+    link.href = post.link;
+    link.textContent = post.title;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    if (viewedPosts.has(post.id)) {
+      link.classList.add('fw-normal', 'text-secondary');
+    } else {
+      link.classList.add('fw-bold');
+    }
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'Просмотр';
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    button.dataset.id = post.id;
+    li.appendChild(link);
+    li.appendChild(button);
+    list.appendChild(li);
+  });
+  card.appendChild(list);
+  postsContainer.appendChild(card);
+}
+
+// Общий рендер
+function render() {
+  renderFeeds();
+  renderPosts();
+}
+
+// Парсинг RSS
+function parseRSS(data) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(data, 'application/xml');
+  const parseError = doc.querySelector('parsererror');
+  if (parseError) throw new Error('noRss');
+
+  const title = doc.querySelector('channel > title')?.textContent;
+  const description = doc.querySelector('channel > description')?.textContent;
+  if (!title) throw new Error('noRss');
+
+  const items = doc.querySelectorAll('item');
+  const parsedPosts = Array.from(items).map((item, idx) => ({
+    id: `${Date.now()}-${idx}`,
+    title: item.querySelector('title')?.textContent || '',
+    description: item.querySelector('description')?.textContent || '',
+    link: item.querySelector('link')?.textContent || '',
+  }));
+
+  return {
+    feed: { title, description: description || '' },
+    posts: parsedPosts,
+  };
+}
+
+// Загрузка RSS через прокси
+async function fetchRSS(url) {
+  const fullUrl = new URL(proxy);
+  fullUrl.searchParams.set('disableCache', 'true');
+  fullUrl.searchParams.set('url', url);
+  try {
+    const response = await axios.get(fullUrl.toString());
+    return response.data.contents;
+  } catch {
+    throw new Error('Network Error');
+  }
+}
+
+// Обработчик отправки формы
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const url = input.value.trim();
+
+  // Пустой URL
+  if (!url) {
+    showMessage('Не должно быть пустым', true);
+    return;
+  }
+
+  // Валидация URL
+  try {
+    new URL(url);
+  } catch {
+    showMessage('Ссылка должна быть валидным URL', true);
+    return;
+  }
+
+  // Проверка на дубликат
+  if (feeds.some(feed => feed.url === url)) {
+    showMessage('RSS уже существует', true);
+    return;
+  }
+
+  // Блокировка кнопки и поля ввода
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  input.readOnly = true;
+  showMessage(''); // очищаем предыдущее сообщение
+
+  try {
+    const data = await fetchRSS(url);
+    const { feed, posts: newPosts } = parseRSS(data);
+
+    const newFeed = {
+      id: Date.now().toString(),
+      url,
+      title: feed.title,
+      description: feed.description,
+    };
+
+    feeds = [newFeed, ...feeds];
+    posts = [...newPosts, ...posts];
+
+    render();
+    showMessage('RSS успешно загружен', false);
+    form.reset();
+  } catch (err) {
+    if (err.message === 'noRss') {
+      showMessage('Ресурс не содержит валидный RSS', true);
+    } else if (err.message === 'Network Error') {
+      showMessage('Ошибка сети', true);
+    } else {
+      showMessage('Ошибка', true);
+    }
+  } finally {
+    submitBtn.disabled = false;
+    input.readOnly = false;
+    input.focus();
+  }
+});
+
+// Обработка кликов по кнопкам "Просмотр" (модальное окно)
+postsContainer.addEventListener('click', (e) => {
+  const button = e.target.closest('.btn-outline-primary');
+  if (!button) return;
+  const postId = button.dataset.id;
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  // Помечаем как просмотренный
+  if (!viewedPosts.has(post.id)) {
+    viewedPosts.add(post.id);
+    renderPosts(); // обновляем классы ссылок
+  }
+
+  // Заполняем модальное окно
+  const modalTitle = document.querySelector('.modal-title');
+  const modalBody = document.querySelector('.modal-body');
+  const fullArticle = document.querySelector('.full-article');
+  if (modalTitle && modalBody && fullArticle) {
+    modalTitle.textContent = post.title;
+    modalBody.textContent = post.description;
+    fullArticle.href = post.link;
+    const modal = new bootstrap.Modal(document.getElementById('modal'));
+    modal.show();
+  }
+});
+
+// Начальный рендер (пустые контейнеры)
+render();
