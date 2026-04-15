@@ -85,7 +85,7 @@ function renderPosts() {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     if (viewedPosts.has(post.id)) {
-   link.classList.add('fw-normal', 'link-secondary')
+link.classList.add('fw-normal', 'link-secondary')
     } else {
       link.classList.add('fw-bold');
     }
