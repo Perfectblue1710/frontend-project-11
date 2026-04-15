@@ -5,11 +5,9 @@ import axios from 'axios'
 
 const proxy = 'https://allorigins.hexlet.app/get'
 
-
-let feeds = [];
-let posts = [];
+let feeds = []
+let posts = []
 let viewedPosts = new Set()
-
 
 const form = document.querySelector('form')
 const feedback = document.querySelector('.feedback')
@@ -17,13 +15,11 @@ const input = document.querySelector('input[name="url"]')
 const feedsContainer = document.querySelector('.feeds')
 const postsContainer = document.querySelector('.posts')
 
-
 function showMessage(text, isError = false) {
   feedback.textContent = text
   feedback.classList.remove('text-success', 'text-danger')
   feedback.classList.add(isError ? 'text-danger' : 'text-success')
 }
-
 
 function renderFeeds() {
   feedsContainer.innerHTML = ''
@@ -41,7 +37,7 @@ function renderFeeds() {
 
   const list = document.createElement('ul')
   list.classList.add('list-group', 'border-0', 'rounded-0')
-  feeds.forEach(feed => {
+  feeds.forEach((feed) => {
     const li = document.createElement('li')
     li.classList.add('list-group-item', 'border-0', 'p-0', 'mb-3')
     const feedTitle = document.createElement('h3')
@@ -57,8 +53,6 @@ function renderFeeds() {
   card.appendChild(list)
   feedsContainer.appendChild(card)
 }
-
-
 
 function renderPosts() {
   postsContainer.innerHTML = ''
@@ -76,7 +70,7 @@ function renderPosts() {
 
   const list = document.createElement('ul')
   list.classList.add('list-group', 'border-0', 'rounded-0')
-  posts.forEach(post => {
+  posts.forEach((post) => {
     const li = document.createElement('li')
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'p-0', 'mb-3')
     const link = document.createElement('a')
@@ -85,7 +79,7 @@ function renderPosts() {
     link.target = '_blank'
     link.rel = 'noopener noreferrer'
     if (viewedPosts.has(post.id)) {
-link.classList.add('fw-normal', 'link-secondary')
+      link.classList.add('fw-normal', 'link-secondary')
     } else {
       link.classList.add('fw-bold')
     }
@@ -97,17 +91,15 @@ link.classList.add('fw-normal', 'link-secondary')
     li.appendChild(link)
     li.appendChild(button)
     list.appendChild(li)
-  });
+  })
   card.appendChild(list)
   postsContainer.appendChild(card)
 }
-
 
 function render() {
   renderFeeds()
   renderPosts()
 }
-
 
 function parseRSS(data) {
   const parser = new DOMParser()
@@ -133,7 +125,6 @@ function parseRSS(data) {
   }
 }
 
-
 async function fetchRSS(url) {
   const fullUrl = new URL(proxy)
   fullUrl.searchParams.set('disableCache', 'true')
@@ -146,17 +137,14 @@ async function fetchRSS(url) {
   }
 }
 
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault()
   const url = input.value.trim()
-
 
   if (!url) {
     showMessage('Не должно быть пустым', true)
     return
   }
-
 
   try {
     new URL(url)
@@ -165,13 +153,10 @@ form.addEventListener('submit', async (e) => {
     return
   }
 
-
-
-  if (feeds.some(feed => feed.url === url)) {
+  if (feeds.some((feed) => feed.url === url)) {
     showMessage('RSS уже существует', true)
     return
   }
-
 
   const submitBtn = form.querySelector('button[type="submit"]')
   submitBtn.disabled = true
@@ -210,20 +195,17 @@ form.addEventListener('submit', async (e) => {
   }
 })
 
-
 postsContainer.addEventListener('click', (e) => {
   const button = e.target.closest('.btn-outline-primary')
   if (!button) return
   const postId = button.dataset.id
-  const post = posts.find(p => p.id === postId)
+  const post = posts.find((p) => p.id === postId)
   if (!post) return
-
 
   if (!viewedPosts.has(post.id)) {
     viewedPosts.add(post.id)
     renderPosts()
   }
-
 
   const modalTitle = document.querySelector('.modal-title')
   const modalBody = document.querySelector('.modal-body')
@@ -238,6 +220,5 @@ postsContainer.addEventListener('click', (e) => {
     modal.show()
   }
 })
-
 
 render()
