@@ -1,29 +1,30 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import * as bootstrap from 'bootstrap';
 import axios from 'axios';
 
 const proxy = 'https://allorigins.hexlet.app/get';
 
-// Состояние
+
 let feeds = [];
 let posts = [];
 let viewedPosts = new Set();
 
-// DOM элементы
+
 const form = document.querySelector('form');
 const feedback = document.querySelector('.feedback');
 const input = document.querySelector('input[name="url"]');
 const feedsContainer = document.querySelector('.feeds');
 const postsContainer = document.querySelector('.posts');
 
-// Вспомогательная функция показа сообщения (без автоочистки, чтобы тесты успели прочитать)
+
 function showMessage(text, isError = false) {
   feedback.textContent = text;
   feedback.classList.remove('text-success', 'text-danger');
   feedback.classList.add(isError ? 'text-danger' : 'text-success');
 }
 
-// Рендер фидов
+
 function renderFeeds() {
   feedsContainer.innerHTML = '';
   if (feeds.length === 0) return;
@@ -57,7 +58,8 @@ function renderFeeds() {
   feedsContainer.appendChild(card);
 }
 
-// Рендер постов
+
+
 function renderPosts() {
   postsContainer.innerHTML = '';
   if (posts.length === 0) return;
@@ -100,13 +102,13 @@ function renderPosts() {
   postsContainer.appendChild(card);
 }
 
-// Общий рендер
+
 function render() {
   renderFeeds();
   renderPosts();
 }
 
-// Парсинг RSS
+
 function parseRSS(data) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(data, 'application/xml');
@@ -131,7 +133,7 @@ function parseRSS(data) {
   };
 }
 
-// Загрузка RSS через прокси
+
 async function fetchRSS(url) {
   const fullUrl = new URL(proxy);
   fullUrl.searchParams.set('disableCache', 'true');
@@ -144,18 +146,18 @@ async function fetchRSS(url) {
   }
 }
 
-// Обработчик отправки формы
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const url = input.value.trim();
 
-  // Пустой URL
+
   if (!url) {
     showMessage('Не должно быть пустым', true);
     return;
   }
 
-  // Валидация URL
+
   try {
     new URL(url);
   } catch {
@@ -163,17 +165,18 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  // Проверка на дубликат
+
+
   if (feeds.some(feed => feed.url === url)) {
     showMessage('RSS уже существует', true);
     return;
   }
 
-  // Блокировка кнопки и поля ввода
+
   const submitBtn = form.querySelector('button[type="submit"]');
   submitBtn.disabled = true;
   input.readOnly = true;
-  showMessage(''); // очищаем предыдущее сообщение
+  showMessage(''); 
 
   try {
     const data = await fetchRSS(url);
@@ -207,7 +210,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// Обработка кликов по кнопкам "Просмотр" (модальное окно)
+
 postsContainer.addEventListener('click', (e) => {
   const button = e.target.closest('.btn-outline-primary');
   if (!button) return;
@@ -215,13 +218,13 @@ postsContainer.addEventListener('click', (e) => {
   const post = posts.find(p => p.id === postId);
   if (!post) return;
 
-  // Помечаем как просмотренный
+
   if (!viewedPosts.has(post.id)) {
     viewedPosts.add(post.id);
-    renderPosts(); // обновляем классы ссылок
+    renderPosts(); 
   }
 
-  // Заполняем модальное окно
+
   const modalTitle = document.querySelector('.modal-title');
   const modalBody = document.querySelector('.modal-body');
   const fullArticle = document.querySelector('.full-article');
@@ -229,10 +232,12 @@ postsContainer.addEventListener('click', (e) => {
     modalTitle.textContent = post.title;
     modalBody.textContent = post.description;
     fullArticle.href = post.link;
-    const modal = new bootstrap.Modal(document.getElementById('modal'));
+    // Показываем модальное окно
+    const modalElement = document.getElementById('modal');
+    const modal = new bootstrap.Modal(modalElement);
     modal.show();
   }
 });
 
-// Начальный рендер (пустые контейнеры)
+
 render();
