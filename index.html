@@ -13,28 +13,21 @@
         <h1 class="mb-4">RSS Reader</h1>
         
         <form novalidate>
-          <div class="mb-3">
-            <label for="url-input" class="form-label">Ссылка RSS</label>
-            <input
-              type="text"
-              name="url"
-              id="url-input"
-              class="form-control"
-              aria-label="url"
-              autocomplete="off"
-              novalidate
-            />
-            <div class="feedback form-text"></div>
-          </div>
-          <button type="submit" class="btn btn-primary">Добавить</button>
-        </form> 
-
-        <div class="feeds mt-4"></div>
-
-        <div class="posts mt-4"></div>
-      </div>
-    </div>
+  <div class="mb-3">
+    <label class="form-label">Ссылка RSS</label>
+    <input
+      type="text"
+      name="url"
+      class="form-control"
+      aria-label="url"
+      autocomplete="off"
+    />
+    <div class="feedback form-text"></div>
   </div>
+  <button type="submit" class="btn btn-primary">Добавить</button>
+</form>
+<div class="feeds mt-4"></div>
+<div class="posts mt-4"></div>
   
   <div class="modal fade" id="modal" tabindex="-1">
     <div class="modal-dialog">

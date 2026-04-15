@@ -1,125 +1,41 @@
-import onChange from 'on-change';
-import { fetchRSS, parseRSS } from './rss.js';
-import {
-  renderFeeds,
-  renderPosts,
-  renderModal,
-  renderForm,
-} from './view.js';
-import initI18n from './i18n.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+// Простой обработчик без i18n и on-change
+const form = document.querySelector('form');
+const feedback = document.querySelector('.feedback');
+const input = document.querySelector('input[name="url"]');
 
-export default async () => {
-  const i18n = await initI18n();
-  
-  const state = {
-    feeds: [],
-    posts: [],
-    form: {
-      status: 'filling',
-      error: null,
-    },
-    ui: {
-      viewedPosts: new Set(),
-      modalPostId: null,
-    },
-  };
-
-  const watchedState = onChange(state, (path) => {
-    if (path.startsWith('feeds')) {
-      renderFeeds(watchedState.feeds, i18n);
-    }
-
-    if (path.startsWith('posts') || path.startsWith('ui.viewedPosts')) {
-      renderPosts(watchedState.posts, watchedState, i18n);
-    }
-
-    if (path === 'ui.modalPostId') {
-      renderModal(watchedState, i18n);
-    }
-
-    if (path.startsWith('form')) {
-      renderForm(watchedState.form, i18n);
-    }
-  });
-
-  const form = document.querySelector('form');
-  const postsContainer = document.querySelector('.posts');
-  
-  // Начальный рендер
-  renderForm(watchedState.form, i18n);
-
+if (form) {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-     e.stopPropagation();
- console.log('📝 Form submitted')
+    e.stopPropagation();
 
-    const formData = new FormData(form);
-    const url = String(formData.get('url') ?? '').trim();
-      console.log('🔗 URL:', url);
-
-
-
-  if (!url || url.trim() === '') {
-    watchedState.form = {
-      status: 'error',
-      error: 'empty',
-    };
-    return;
+    const url = input.value.trim();
+    
+    if (!url) {
+      feedback.textContent = 'Не должно быть пустым';
+      feedback.classList.add('text-danger');
+      return;
     }
-
-  try {
-    new URL(url);
-    console.log('✅ URL is valid');
-  } catch {
-    console.log('❌ Invalid URL');
-    watchedState.form = {
-      status: 'error',
-      error: 'invalidUrl',
-    };
-    return;
-  }
-  
-
-  if (watchedState.feeds.some((feed) => feed.url === url)) {
-    console.log('⚠️ Duplicate URL');
-    watchedState.form = {
-      status: 'error',
-      error: 'exists',
-    };
-    return;
-  }
-  
-  console.log('🚀 Sending request...');
-  watchedState.form = {
-    status: 'sending',
-    error: null,
-  };
-  
-  fetchRSS(url)
-    .then(parseRSS)
-    .then(({ feed, posts }) => {
-      console.log('✅ RSS loaded:', { feed, postsCount: posts.length });
-      // ... остальной код
-      watchedState.form = {
-        status: 'success',
-        error: null,
-      };
-      form.reset();
-    })
-    .catch((error) => {
-      console.error('❌ Error loading RSS:', error.message);
-      let errorType = 'unknown';
-      if (error.message === 'Network Error') {
-        errorType = 'network';
-      } else if (error.message === 'noRss') {
-        errorType = 'noRss';
-      }
-      watchedState.form = {
-        status: 'error',
-        error: errorType,
-      };
-    });
-});
+    
+    try {
+      new URL(url);
+      feedback.textContent = 'RSS успешно загружен';
+      feedback.classList.add('text-success');
+      // Очистка формы (по желанию)
+      input.value = '';
+    } catch {
+      feedback.textContent = 'Ссылка должна быть валидным URL';
+      feedback.classList.add('text-danger');
+    }
+    
+    // Убираем классы через 3 секунды (для чистоты)
+    setTimeout(() => {
+      feedback.classList.remove('text-success', 'text-danger');
+      feedback.textContent = '';
+    }, 3000);
+  });
+} else {
+  console.error('Form not found!');
 }
