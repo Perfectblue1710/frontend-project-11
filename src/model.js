@@ -18,8 +18,9 @@ export const markPostAsViewed = (postId) => {
   viewedPosts.add(postId)
 }
 
-export const isPostViewed = (postId) => viewedPosts.has(postId)
+export const isPostViewed = postId => viewedPosts.has(postId)
 
 export const resetFormState = () => {
 
 }
+
