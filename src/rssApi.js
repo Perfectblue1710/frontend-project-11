@@ -9,7 +9,8 @@ export async function fetchRSS(url) {
   try {
     const response = await axios.get(fullUrl.toString())
     return response.data.contents
-  } catch {
+  }
+  catch {
     throw new Error('Network Error')
   }
 }

@@ -9,14 +9,14 @@ export function initFormHandler() {
     e.preventDefault()
     const url = input.value.trim()
 
-    // Валидация
     if (!url) {
       view.showMessage('Не должно быть пустым', true)
       return
     }
     try {
       new URL(url)
-    } catch {
+    }
+    catch {
       view.showMessage('Ссылка должна быть валидным URL', true)
       return
     }
@@ -48,15 +48,19 @@ export function initFormHandler() {
       view.renderFull(model.getFeeds(), model.getPosts(), model.getViewedPosts())
       view.showMessage('RSS успешно загружен', false)
       form.reset()
-    } catch (err) {
+    }
+    catch (err) {
       if (err.message === 'noRss') {
         view.showMessage('Ресурс не содержит валидный RSS', true)
-      } else if (err.message === 'Network Error') {
+      }
+      else if (err.message === 'Network Error') {
         view.showMessage('Ошибка сети', true)
-      } else {
+      }
+      else {
         view.showMessage('Ошибка', true)
       }
-    } finally {
+    }
+    finally {
       submitBtn.disabled = false
       input.readOnly = false
       input.focus()

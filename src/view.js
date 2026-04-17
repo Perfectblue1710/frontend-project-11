@@ -76,7 +76,8 @@ export function renderPosts(posts, viewedPosts) {
     link.rel = 'noopener noreferrer'
     if (viewedPosts.has(post.id)) {
       link.classList.add('fw-normal', 'link-secondary')
-    } else {
+    }
+    else {
       link.classList.add('fw-bold')
     }
     const button = document.createElement('button')
