@@ -23,4 +23,3 @@ export const isPostViewed = postId => viewedPosts.has(postId)
 export const resetFormState = () => {
 
 }
-
